@@ -1,280 +1,282 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Apology</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            background: #000;
-            font-family: Arial, sans-serif;
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            width: 100vw;
-            touch-action: none; /* Prevent scrolling on mobile */
-        }
-        #container {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(to bottom, #000, #001122);
-        }
-        .particle {
-            position: absolute;
-            width: 4px;
-            height: 4px;
-            background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 70%);
-            border-radius: 50%;
-            box-shadow: 0 0 10px rgba(255,255,255,0.5);
-            pointer-events: none;
-        }
-        .crack {
-            position: absolute;
-            stroke: rgba(255,255,255,0.3);
-            stroke-width: 2;
-            fill: none;
-            opacity: 0;
-        }
-        .letter {
-            position: absolute;
-            font-size: 80px;
-            font-weight: bold;
-            color: rgba(255,255,255,0.9);
-            text-shadow: 0 0 20px rgba(255,255,255,0.8);
-            opacity: 0;
-            transform: scale(0);
-        }
-        .handwritten {
-            font-family: 'Brush Script MT', cursive; /* Simulates handwritten */
-        }
-        .dust {
-            background: rgba(200,200,200,0.8);
-            box-shadow: 0 0 5px rgba(200,200,200,0.5);
-        }
-        .vein {
-            background: radial-gradient(circle, rgba(255,0,0,0.8) 0%, rgba(255,0,0,0) 70%);
-            box-shadow: 0 0 10px rgba(255,0,0,0.5);
-        }
-        .spark {
-            width: 2px;
-            height: 2px;
-            background: rgba(255,255,255,1);
-            box-shadow: 0 0 5px rgba(255,255,255,1);
-        }
-        #tap-text {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 18px;
-            opacity: 0;
-            pointer-events: none;
-        }
-        #hold-button {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 10px 20px;
-            background: rgba(255,255,255,0.2);
-            border: 1px solid rgba(255,255,255,0.5);
-            border-radius: 20px;
-            color: white;
-            font-size: 16px;
-            cursor: pointer;
-            opacity: 0;
-            pointer-events: none;
-        }
-        audio {
-            display: none;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Living Apology</title>
+
+<!-- GSAP (Free) -->
+<script src="https://unpkg.com/gsap@3/dist/gsap.min.js"></script>
+
+<style>
+/* ================= RESET ================= */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  background: #000;
+  overflow: hidden;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* ================= CANVAS ================= */
+canvas {
+  position: fixed;
+  inset: 0;
+}
+
+/* ================= UI ================= */
+#hint {
+  position: fixed;
+  bottom: 14%;
+  width: 100%;
+  text-align: center;
+  color: rgba(255,255,255,0.6);
+  font-size: 13px;
+  letter-spacing: 2px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+#holdButton {
+  position: fixed;
+  bottom: 10%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 14px 28px;
+  border-radius: 40px;
+  background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.85);
+  font-size: 14px;
+  letter-spacing: 1px;
+  backdrop-filter: blur(12px);
+  opacity: 0;
+  user-select: none;
+}
+</style>
 </head>
+
 <body>
-    <div id="container">
-        <svg width="100%" height="100%" id="cracks"></svg>
-        <div id="particles"></div>
-        <div id="letters"></div>
-        <div id="tap-text">Tap the screen</div>
-        <button id="hold-button">Hold to feel it</button>
-        <audio id="heartbeat" loop>
-            <source src="heartbeat.mp3" type="audio/mpeg"> <!-- Placeholder: Download free heartbeat sound from freesound.org -->
-        </audio>
-        <audio id="whisper">
-            <source src="whisper.mp3" type="audio/mpeg"> <!-- Placeholder: Record or download free whisper -->
-        </audio>
-        <audio id="breathing" loop>
-            <source src="breathing.mp3" type="audio/mpeg"> <!-- Placeholder: Download free breathing sound -->
-        </audio>
-    </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script> <!-- GSAP for animations -->
-    <script>
-        // Global variables
-        const container = document.getElementById('container');
-        const particlesDiv = document.getElementById('particles');
-        const lettersDiv = document.getElementById('letters');
-        const cracksSvg = document.getElementById('cracks');
-        const tapText = document.getElementById('tap-text');
-        const holdButton = document.getElementById('hold-button');
-        const heartbeatAudio = document.getElementById('heartbeat');
-        const whisperAudio = document.getElementById('whisper');
-        const breathingAudio = document.getElementById('breathing');
+<canvas id="scene"></canvas>
+<div id="hint">Tap the screen</div>
+<div id="holdButton">Hold to feel it</div>
 
-        let particles = [];
-        let cracks = [];
-        let scene = 0; // 0: init, 1: sorry, 2: transform, 3: iloveyou
-        let tl = gsap.timeline(); // Main timeline for sequencing
+<script>
+/* =====================================================
+   LIVING APOLOGY — SINGLE FILE ENGINE
+   ===================================================== */
 
-        // Letter positions (simplified coordinates for "SORRY" and "I LOVE YOU")
-        const sorryPositions = [
-            // S: array of [x,y] for particles
-            [[50,50],[55,45],[60,40],[65,45],[70,50],[65,55],[60,60],[55,65],[50,70],[45,65]],
-            // O: [[...]]
-            [[100,50],[105,45],[110,40],[115,45],[120,50],[125,55],[120,60],[115,65],[110,70],[105,65]],
-            // R: [[...]]
-            [[150,50],[155,45],[160,40],[165,45],[170,50],[165,55],[160,60],[155,65],[150,70],[145,65]],
-            // R: [[...]]
-            [[200,50],[205,45],[210,40],[215,45],[220,50],[215,55],[210,60],[205,65],[200,70],[195,65]],
-            // Y: [[...]]
-            [[250,50],[255,45],[260,40],[265,45],[270,50],[265,55],[260,60],[255,65],[250,70],[245,65]]
-        ];
-        const iloveyouPositions = [
-            // I: [[...]]
-            [[50,200],[55,195],[60,190],[65,195],[70,200],[65,205],[60,210],[55,215],[50,220],[45,215]],
-            // L: [[...]]
-            [[100,200],[105,195],[110,190],[115,195],[120,200],[125,205],[120,210],[115,215],[110,220],[105,215]],
-            // O: [[...]]
-            [[150,200],[155,195],[160,190],[165,195],[170,200],[175,205],[170,210],[165,215],[160,220],[155,215]],
-            // V: [[...]]
-            [[200,200],[205,195],[210,190],[215,195],[220,200],[225,205],[220,210],[215,215],[210,220],[205,215]],
-            // E: [[...]]
-            [[250,200],[255,195],[260,190],[265,195],[270,200],[275,205],[270,210],[265,215],[260,220],[255,215]],
-            // Y: [[...]]
-            [[300,200],[305,195],[310,190],[315,195],[320,200],[325,205],[320,210],[315,215],[310,220],[305,215]],
-            // O: [[...]]
-            [[350,200],[355,195],[360,190],[365,195],[370,200],[375,205],[370,210],[365,215],[360,220],[355,215]],
-            // U: [[...]]
-            [[400,200],[405,195],[410,190],[415,195],[420,200],[425,205],[420,210],[415,215],[410,220],[405,215]]
-        ];
+const canvas = document.getElementById("scene");
+const ctx = canvas.getContext("2d");
 
-        // Initialize particles (100 for letters, more for dust/sparks)
-        function createParticles(count, className) {
-            for (let i = 0; i < count; i++) {
-                const p = document.createElement('div');
-                p.className = `particle ${className}`;
-                p.style.left = Math.random() * 100 + 'vw';
-                p.style.top = Math.random() * 100 + 'vh';
-                particlesDiv.appendChild(p);
-                particles.push(p);
-            }
-        }
+let w, h, dpr = window.devicePixelRatio || 1;
 
-        // Create cracks (simple lines)
-        function createCracks() {
-            for (let i = 0; i < 5; i++) { // 5 cracks for "SORRY"
-                const crack = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-                crack.className = 'crack';
-                crack.setAttribute('d', `M${Math.random()*100} ${Math.random()*100} L${Math.random()*100} ${Math.random()*100}`);
-                cracksSvg.appendChild(crack);
-                cracks.push(crack);
-            }
-        }
+function resize() {
+  w = canvas.width = innerWidth * dpr;
+  h = canvas.height = innerHeight * dpr;
+  canvas.style.width = innerWidth + "px";
+  canvas.style.height = innerHeight + "px";
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+resize();
+addEventListener("resize", resize);
 
-        // Start scene 1: Heartbeat, cracks, form "SORRY"
-        function startScene1() {
-            heartbeatAudio.volume = 0.3;
-            heartbeatAudio.play();
-            tl.to(cracks[0], {opacity: 1, scale: 1.1, duration: 1, ease: "power2.inOut"}, 0);
-            tl.to(cracks[1], {opacity: 1, scale: 1.1, duration: 1, ease: "power2.inOut"}, 1);
-            tl.to(cracks[2], {opacity: 1, scale: 1.1, duration: 1, ease: "power2.inOut"}, 2);
-            tl.to(cracks[3], {opacity: 1, scale: 1.1, duration: 1, ease: "power2.inOut"}, 3);
-            tl.to(cracks[4], {opacity: 1, scale: 1.1, duration: 1, ease: "power2.inOut"}, 4);
-            // Animate particles to form "SORRY" with shake for regret
-            sorryPositions.forEach((letter, idx) => {
-                letter.forEach((pos, pidx) => {
-                    const p = particles[idx * 10 + pidx];
-                    tl.to(p, {x: pos[0], y: pos[1], duration: 0.5, ease: "elastic.out(1, 0.3)"}, idx * 1 + 0.5);
-                    tl.to(p, {scale: 1.2, duration: 0.1, yoyo: true, repeat: 3, ease: "power2.inOut"}, idx * 1 + 1); // Shake
-                });
-            });
-            tl.to(tapText, {opacity: 1, duration: 1}, 5);
-            // On tap, reverse dust fall
-            container.addEventListener('touchstart', handleTap, {once: true});
-        }
+/* ================= AUDIO (Web Audio API) ================= */
 
-        function handleTap() {
-            // Collapse letters to dust and fall
-            particles.forEach(p => {
-                p.classList.add('dust');
-                gsap.to(p, {y: '+=100vh', duration: 2, ease: "power2.inOut", onComplete: () => {
-                    whisperAudio.volume = 0.2;
-                    whisperAudio.play();
-                }});
-            });
-            gsap.to(tapText, {opacity: 0, duration: 1});
-            // Reverse on tap
-            setTimeout(() => {
-                particles.forEach(p => gsap.to(p, {y: '-=100vh', duration: 2, ease: "power2.inOut", onComplete: startScene2}));
-            }, 2000);
-        }
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-        // Scene 2: Transform to veins, background shift, breathing
-        function startScene2() {
-            heartbeatAudio.pause();
-            breathingAudio.volume = 0.3;
-            breathingAudio.play();
-            particles.forEach(p => {
-                p.classList.remove('dust');
-                p.classList.add('vein');
-                gsap.to(p, {background: 'radial-gradient(circle, rgba(255,0,0,0.8) 0%, rgba(255,0,0,0) 70%)', duration: 1});
-            });
-            gsap.to(container, {background: 'linear-gradient(to bottom, #ff7e5f, #feb47b)', duration: 3, ease: "slow(0.7, 0.7, false)"}); // Sunset
-            setTimeout(startScene3, 3000);
-        }
+function heartbeat() {
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = "sine";
+  osc.frequency.value = 70;
+  gain.gain.value = 0.18;
+  osc.connect(gain).connect(audioCtx.destination);
+  osc.start();
+  osc.frequency.exponentialRampToValueAtTime(20, audioCtx.currentTime + 0.2);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.35);
+  osc.stop(audioCtx.currentTime + 0.4);
+}
 
-        // Scene 3: Form "I LOVE YOU", pulses, sparks
-        function startScene3() {
-            // Animate to new positions
-            iloveyouPositions.forEach((letter, idx) => {
-                letter.forEach((pos, pidx) => {
-                    const p = particles[idx * 10 + pidx];
-                    gsap.to(p, {x: pos[0], y: pos[1], duration: 1, ease: "power2.inOut"});
-                });
-                // Pulse each letter
-                gsap.to(particles.slice(idx*10, (idx+1)*10), {scale: 1.5, duration: 0.5, yoyo: true, ease: "power2.inOut"}, idx * 0.5);
-            });
-            // Add sparks
-            createParticles(50, 'spark');
-            particles.slice(-50).forEach(p => {
-                gsap.to(p, {y: '-=100vh', duration: 5, repeat: -1, ease: "slow(0.7, 0.7, false)"});
-            });
-            gsap.to(holdButton, {opacity: 1, pointerEvents: 'auto', duration: 1});
-            // Long press
-            holdButton.addEventListener('touchstart', handleHold);
-            holdButton.addEventListener('touchend', handleRelease);
-        }
+function breathe() {
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = "sine";
+  osc.frequency.value = 160;
+  gain.gain.value = 0.04;
+  osc.connect(gain).connect(audioCtx.destination);
+  osc.start();
+  gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 2);
+  osc.stop(audioCtx.currentTime + 2);
+}
 
-        function handleHold() {
-            gsap.to(particles, {scale: 1.8, duration: 0.5, ease: "power2.inOut"});
-            gsap.to(container, {background: 'linear-gradient(to bottom, #fff, #ffeaa7)', duration: 1});
-        }
+/* ================= PARTICLES ================= */
 
-        function handleRelease() {
-            gsap.to(particles, {scale: 1, duration: 0.5, ease: "power2.inOut"});
-            gsap.to(container, {background: 'linear-gradient(to bottom, #ff7e5f, #feb47b)', duration: 1});
-        }
+class Particle {
+  constructor(x, y, color = "255,220,220") {
+    this.x = x;
+    this.y = y;
+    this.vx = (Math.random() - 0.5) * 0.6;
+    this.vy = Math.random() * 0.8;
+    this.life = 1;
+    this.color = color;
+  }
+  update() {
+    this.x += this.vx;
+    this.y += this.vy;
+    this.life -= 0.003;
+  }
+  draw() {
+    ctx.fillStyle = `rgba(${this.color},${this.life})`;
+    ctx.fillRect(this.x, this.y, 1.3, 1.3);
+  }
+}
 
-        // Init
-        createParticles(50, ''); // For SORRY
-        createCracks();
-        startScene1();
-    </script>
+let particles = [];
+
+/* ================= STATE ================= */
+
+let state = "dark";
+let beatCount = 0;
+const letters = ["S", "O", "R", "R", "Y"];
+
+/* ================= RENDER LOOP ================= */
+
+function render() {
+  ctx.clearRect(0, 0, w, h);
+
+  if (state === "love") {
+    const g = ctx.createLinearGradient(0, 0, 0, h);
+    g.addColorStop(0, "#24131f");
+    g.addColorStop(1, "#ff7b7b");
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, w, h);
+  }
+
+  particles.forEach((p, i) => {
+    p.update();
+    p.draw();
+    if (p.life <= 0) particles.splice(i, 1);
+  });
+
+  requestAnimationFrame(render);
+}
+render();
+
+/* ================= SCENE 1 — SORRY ================= */
+
+function sorryHeartbeat() {
+  if (beatCount >= letters.length) {
+    collapse();
+    return;
+  }
+
+  heartbeat();
+
+  for (let i = 0; i < 240; i++) {
+    particles.push(
+      new Particle(
+        innerWidth / 2 + (Math.random() - 0.5) * 60,
+        innerHeight / 2 + (Math.random() - 0.5) * 25
+      )
+    );
+  }
+
+  beatCount++;
+  setTimeout(sorryHeartbeat, 900);
+}
+
+/* ================= COLLAPSE ================= */
+
+function collapse() {
+  document.getElementById("hint").style.opacity = 1;
+  gsap.to(particles, {
+    vy: 2.2,
+    duration: 2.2,
+    ease: "power2.in"
+  });
+}
+
+/* ================= TAP → REVERSE ================= */
+
+addEventListener("pointerdown", () => {
+  if (state !== "dark") return;
+  audioCtx.resume();
+  document.getElementById("hint").style.opacity = 0;
+
+  gsap.to(particles, {
+    vy: -1.4,
+    duration: 2,
+    ease: "power3.out",
+    onComplete: transform
+  });
+});
+
+/* ================= TRANSFORMATION ================= */
+
+function transform() {
+  state = "love";
+  breathe();
+
+  gsap.to(document.body, {
+    backgroundColor: "#24131f",
+    duration: 3
+  });
+
+  setTimeout(loveReveal, 1200);
+}
+
+/* ================= I LOVE YOU ================= */
+
+function loveReveal() {
+  particles.length = 0;
+
+  for (let i = 0; i < 900; i++) {
+    particles.push(
+      new Particle(
+        innerWidth / 2 + Math.sin(i) * 90,
+        innerHeight / 2 + Math.cos(i * 0.8) * 35,
+        "255,120,120"
+      )
+    );
+  }
+
+  document.getElementById("holdButton").style.opacity = 1;
+}
+
+/* ================= HOLD ================= */
+
+let holdTimer;
+const holdBtn = document.getElementById("holdButton");
+
+holdBtn.addEventListener("pointerdown", () => {
+  holdTimer = setTimeout(() => {
+    gsap.to(particles, {
+      life: 2,
+      duration: 2.5,
+      ease: "elastic.out(1,0.4)"
+    });
+    gsap.to(document.body, {
+      backgroundColor: "#ffd6d6",
+      duration: 3
+    });
+  }, 600);
+});
+
+holdBtn.addEventListener("pointerup", () => clearTimeout(holdTimer));
+holdBtn.addEventListener("pointerleave", () => clearTimeout(holdTimer));
+
+/* ================= START ================= */
+
+setTimeout(sorryHeartbeat, 1200);
+</script>
+
 </body>
 </html>
